@@ -90,22 +90,6 @@ pip install -r requirements.txt
 mongod
 ```
 
-### Downloading Sprites
-The project includes a utility script to download all Pokémon `default_front` sprites for potential visual display.
-
-Why we included this:
-- The script dynamically gets the total number of Pokémon from the API, so it works with any current or future Pokémon count
-- No MongoDB required - downloads directly from PokeAPI
-- Saves images as {pokemon_id}.png for easy lookup
-
-To run:
-```bash
-pip install requests  # If not already installed
-python download_sprites.py
-```
-
-> This will create a sprites/ folder and download all available Pokémon sprites; it includes a small delay between requests to respect PokeAPI's rate limits.
-
 ## Usage
 
 ### ETL Pipeline
@@ -158,6 +142,22 @@ Instructions on how to use the transformed data to search:
 - Normalised nested objects from API into flat documents for MongoDB
 - Used existing JSON structure to maintain relationships
 
+### Downloading Sprites
+The project includes a utility script to download all Pokémon `default_front` sprites for potential visual display.
+
+Why we included this:
+- The script dynamically gets the total number of Pokémon from the API, so it works with any current or future Pokémon count
+- No MongoDB required - downloads directly from PokeAPI
+- Saves images as {pokemon_id}.png for easy lookup
+- Local copies ensure we're not dependent on external URLs that could change or break over time
+
+To run:
+```bash
+pip install requests  # If not already installed
+python download_sprites.py
+```
+
+> This will create a sprites/ folder and download all available Pokémon sprites; it includes a small delay between requests to respect PokeAPI's rate limits.
 
 ## Future Improvements
 - Add more Pokémon collections (Abilities, Items, etc.)
@@ -171,3 +171,21 @@ Instructions on how to use the transformed data to search:
 
 ## License
 MIT License
+
+## Semantic Search Notes
+
+QUESTION: in a pokemon battle is it better to have this or that to beat
+
+QUESTION: what is the best move against another team of pokemon
+
+QUESTION: looking at what types of moves a pokemon knows, i have these pokemon in my team, i'm about to face this team, what moves should i teach my pokemon to have the best match up?
+
+-> Question: are we giving AI the parameters to choose from
+-> in what scenario
+
+QUESTION-> here's the team i'm going up against; what team should i go against based on stats and type that would be the best team?
+
+Question-> given that my opponent will lead with this pokemon, which one should i lead with?
+
+
+QUESTION: 'enter a pokemon that is similar to pikachu' --> maybe it can pick one with same moves etc.
