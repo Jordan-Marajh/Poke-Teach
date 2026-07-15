@@ -4,34 +4,39 @@ from pymongo import MongoClient
 POKE_API_URL = "https://pokeapi.co/api/v2" # URL for online API
 
 def get_poke_data(group):
+
     # Download all pokemon documents from PokeAPI as a JSON file. 
 
-    response = requests.get(f"{POKE_API_URL}/{group}",params={"limit": 100000},timeout=60)
+    response = requests.get(f"{POKE_API_URL}/{group}",params={"limit": 25},timeout=60)
     response.raise_for_status()
 
     return response.json()["results"]
 
 def replace_urls(collection):
+
+    # Replace URLs with Pokemon information
+
     entries = collection.find(
         {"url": {'$exists': True}},
         {"url": 1}
     )
 
+    # !!!! SIMPLE TESTING REQUIRED HERE !!!! Like in starships script
+
     for entry in entries:
         response = requests.get(entry["url"], timeout=60)
         response.raise_for_status()
 
-        collection.update_one(
+        details = response.json()
+
+        collection.replace_one(
             {"_id": entry["_id"]},
-            {
-                "$set": {"data": response.json()},
-                "$unset": {"url": ""}
-            }
+            details
         )
 
 ## Main loop for task using the above functions.
 
-def main():
+def import_data():
     client = MongoClient("mongodb://localhost:27017/") # IP and Port for MongoDB to use
 
     database = client["pokemon"]
@@ -79,8 +84,3 @@ def main():
     #########################
 
     client.close()
-
-
-# Execution statement
-if __name__ == "__main__":
-    main()
