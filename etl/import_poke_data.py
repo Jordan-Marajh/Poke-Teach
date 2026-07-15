@@ -26,7 +26,12 @@ def replace_urls(collection):
         {"url": 1}
     )
 
-    for entry in entries:
+    total_entries = collection.count_documents(
+        {"url": {"$exists": True}}
+    )
+
+
+    for count, entry in enumerate(entries, start=1):
         response = requests.get(entry["url"], timeout=60)
         response.raise_for_status()
 
@@ -36,6 +41,13 @@ def replace_urls(collection):
             {"_id": entry["_id"]},
             details
         )
+
+        print(
+            f"\r({count}/{total_entries})",
+            end=""
+        )
+
+    print()
 
 ## Main loop for task using the above functions.
 
@@ -53,7 +65,7 @@ def import_data():
         
         ######################### Pokemon
 
-        print("Downloading Pokémon list...")
+        print(f"Downloading Pokémon list...")
         pokemon_data = get_data("pokemon")
 
         pokemon_result = pokemon_collection.insert_many(pokemon_data)
@@ -63,14 +75,9 @@ def import_data():
         print("Replacing Pokémon URLs with detailed data...")
         replace_urls(pokemon_collection)
 
-        print(
-            "Pokémon documents currently in MongoDB:",
-            pokemon_collection.count_documents({})
-        )
-
         ######################### Moves
 
-        print("Downloading move list...")
+        print("\nDownloading move list...")
         moves_data = get_data("move")
 
         move_result = move_collection.insert_many(moves_data)
@@ -79,11 +86,6 @@ def import_data():
 
         print("Replacing Move URLs with detailed data...")
         replace_urls(move_collection)
-
-        print(
-            "Move documents currently in MongoDB:",
-            move_collection.count_documents({})
-        )
 
         #########################
 

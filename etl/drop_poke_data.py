@@ -98,7 +98,7 @@ def drop_data():
             MOVE_FIELDS_TO_KEEP
         )
 
-        print("\nUnneeded data removed successfully.")
+        print("\nData removed successfully.")
 
     finally:
         client.close()
