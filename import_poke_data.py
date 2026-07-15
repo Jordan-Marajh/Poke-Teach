@@ -1,13 +1,18 @@
 import requests
 from pymongo import MongoClient
+from pymongo.errors import PyMongoError
 
 POKE_API_URL = "https://pokeapi.co/api/v2" # URL for online API
 
-def get_poke_data(group):
+def get_data(group):
 
     # Download all pokemon documents from PokeAPI as a JSON file. 
 
-    response = requests.get(f"{POKE_API_URL}/{group}",params={"limit": 25},timeout=60)
+    response = requests.get(
+        f"{POKE_API_URL}/{group}",
+        params={"limit": 25},
+        timeout=60
+    )
     response.raise_for_status()
 
     return response.json()["results"]
@@ -20,8 +25,6 @@ def replace_urls(collection):
         {"url": {'$exists': True}},
         {"url": 1}
     )
-
-    # !!!! SIMPLE TESTING REQUIRED HERE !!!! Like in starships script
 
     for entry in entries:
         response = requests.get(entry["url"], timeout=60)
@@ -50,7 +53,7 @@ def import_data():
     ######################### Pokemon
 
     print("Downloading Pokémon list...")
-    pokemon_data = get_poke_data("pokemon")
+    pokemon_data = get_data("pokemon")
 
     pokemon_result = pokemon_collection.insert_many(pokemon_data)
 
@@ -67,7 +70,7 @@ def import_data():
     ######################### Moves
 
     print("Downloading move list...")
-    moves_data = get_poke_data("move")
+    moves_data = get_data("move")
 
     move_result = move_collection.insert_many(moves_data)
 
