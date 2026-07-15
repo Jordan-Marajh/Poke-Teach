@@ -32,7 +32,7 @@ def download_sprites():
     # Check that pokemon.json exists.
     if not POKEMON_FILE.is_file():
         print(f"File not found: {POKEMON_FILE}")
-        return
+        return False
 
     # Read the transformed Pokémon data.
     try:
@@ -44,18 +44,18 @@ def download_sprites():
 
     except (OSError, json.JSONDecodeError) as error:
         print(f"Could not read Pokémon data: {error}")
-        return
+        return False
 
     # pokemon.json should contain a list of Pokémon.
     if not isinstance(pokemon_data, list):
         print("pokemon.json does not contain a list.")
-        return
+        return False
 
     total_pokemon = len(pokemon_data)
 
     if total_pokemon == 0:
         print("No Pokémon were found in pokemon.json.")
-        return
+        return False
 
     # Remove sprites left over from previous pipeline runs.
     clear_sprite_folder()
@@ -127,3 +127,8 @@ def download_sprites():
     print(f"Successfully downloaded: {success_count}")
     print(f"Failed or skipped: {fail_count}")
     print(f"Saved to: {SPRITE_FOLDER.absolute()}")
+
+    return fail_count == 0
+
+if __name__ == "__main__":
+    download_sprites()

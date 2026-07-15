@@ -14,26 +14,37 @@ def main():
     print(f"------------------------\n")
 
     print("1. Extracting PokeAPI data and loading it into MongoDB...\n")
-    import_data()
+    if not import_data():
+        print("\nPipeline stopped during data import.")
+        return False
     print(f"------------------------\n")
 
     print("2. Dropping specified fields...\n")
-    drop_data()
+    if not drop_data():
+        print("\nPipeline stopped during field removal.")
+        return False
     print(f"------------------------\n")
 
     print("3. Transforming MongoDB data...\n")
-    transform_data()
+    if not transform_data():
+        print("\nPipeline stopped during transformation.")
+        return False
     print(f"------------------------\n")
 
     print("4. Downloading Pokémon sprites...\n")
-    download_sprites()
+    if not download_sprites():
+        print("\nPipeline stopped during sprite download.")
+        return False
     print(f"------------------------\n")
 
     print("5. Uploading JSON files and sprites to S3...\n")
-    upload_to_s3()
+    if not upload_to_s3():
+        print("\nPipeline stopped during the S3 upload.")
+        return False
     print(f"------------------------\n")
 
     print("Pokémon ETL pipeline completed successfully.")
+    return True
 
 if __name__ == "__main__":
     main()

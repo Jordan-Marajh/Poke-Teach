@@ -89,11 +89,19 @@ def import_data():
 
         #########################
 
+        print("\nData imported successfully.")
+        return True
+
     except requests.exceptions.RequestException as error:
         print(f"Error requesting data from PokeAPI: {error}")
+        return False
 
     except PyMongoError as error:
         print(f"MongoDB error: {error}")
+        return False
 
     finally:
         client.close()
+
+if __name__ == "__main__":
+    import_data()

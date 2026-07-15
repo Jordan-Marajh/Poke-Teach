@@ -4,7 +4,7 @@ from pathlib import Path
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
 
-EXPORT_FOLDER = Path("exports")
+EXPORT_FOLDER = Path(__file__).resolve().parent.parent
 MONGO_URI = "mongodb://localhost:27017/"
 DATABASE_NAME = "pokemon"
 
@@ -146,6 +146,14 @@ def transform_data():
         pokemon_collection = database["pokemon"]
         move_collection = database["move"]
 
+        if pokemon_collection.count_documents({}) == 0:
+            print("The Pokémon collection is empty.")
+            return False
+
+        if move_collection.count_documents({}) == 0:
+            print("The move collection is empty.")
+            return False
+
         ######################### Pokémon
 
         print("\nTransforming Pokémon documents...")
@@ -205,13 +213,24 @@ def transform_data():
             "moves.json"
         )
 
+        return True
+
         #########################
 
     except PyMongoError as error:
         print(f"MongoDB error: {error}")
+        return False
 
     except (KeyError, TypeError) as error:
         print(f"Error transforming data: {error}")
+        return False
+
+    except OSError as error:
+        print(f"Error exporting JSON data: {error}")
+        return False
 
     finally:
         client.close()
+
+if __name__ == "__main__":
+    transform_data()

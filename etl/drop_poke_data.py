@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+from pymongo.errors import PyMongoError
 
 MONGO_URI = "mongodb://localhost:27017/"
 DATABASE_NAME = "pokemon"
@@ -45,6 +46,7 @@ def remove_fields(collection, fields_to_keep):
     # Simple error catch for empty collections.
     if document is None:
         print(f"No documents found in the '{collection.name}' collection.")
+        return False
 
     existing_fields = set(document.keys())
     fields_to_drop = existing_fields - fields_to_keep
@@ -55,7 +57,7 @@ def remove_fields(collection, fields_to_keep):
             f"No fields need to be removed from "
             f"the '{collection.name}' collection."
         )
-        return
+        return True
     
     # Record which fields to unset.
     unset_fields = {
@@ -75,6 +77,8 @@ def remove_fields(collection, fields_to_keep):
     print(f"Fields removed: {sorted(fields_to_drop)}")
     print(f"Documents updated: {result.modified_count}")
 
+    return True
+
 def drop_data():
     client = MongoClient(MONGO_URI)
 
@@ -86,20 +90,32 @@ def drop_data():
 
         print("Removing unwanted Pokémon fields...")
 
-        remove_fields(
+        pokemon_success = remove_fields(
             pokemon_collection,
             POKEMON_FIELDS_TO_KEEP
         )
 
         print("\nRemoving unwanted move fields...")
 
-        remove_fields(
+        move_success = remove_fields(
             move_collection,
             MOVE_FIELDS_TO_KEEP
         )
 
-        print("\nData removed successfully.")
+        if pokemon_success and move_success:
+            print("\nData removed successfully.")
+            return True
+        
+        print("\nField removal was not completed.")
+        return False
+    
+    except PyMongoError as error:
+        print(f"MongoDB error: {error}")
+        return False
 
     finally:
         client.close()
+
+if __name__ == "__main__":
+    drop_data()
 

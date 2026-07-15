@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import boto3
-from botocore.exceptions import BotoCoreError, ClientError
+from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError, PartialCredentialsError
 
 # Find the project root folder.
 PROJECT_FOLDER = Path(__file__).resolve().parent.parent
@@ -17,11 +17,41 @@ MOVES_FILE = EXPORT_FOLDER / "moves.json"
 BUCKET_NAME = "se-data-with-ai-etl-project"
 AWS_REGION = "eu-central-1"
 
-# Replace this with the folder assigned to your group in the shared bucket.
+# Sub-folder name of choice.
 S3_PREFIX = "Poke-Teach"
 
 
-def upload_file(s3_client, local_file, s3_key):
+def create_s3_client():
+
+    try:
+        session = boto3.Session(
+            region_name=AWS_REGION
+        )
+
+        credentials = session.get_credentials()
+
+        if credentials is None:
+            print("No AWS credentials were found.")
+            return None
+
+        # Confirm that the credentials are valid.
+        sts_client = session.client("sts")
+        sts_client.get_caller_identity()
+
+        print("AWS credentials verified.")
+
+        return session.client("s3")
+
+    except (
+        NoCredentialsError,
+        PartialCredentialsError,
+        BotoCoreError,
+        ClientError
+    ) as error:
+        print(f"Could not verify AWS credentials: {error}")
+        return None
+
+def upload_file(s3_client, local_file, s3_key, content_type):
 
     # Check that the local file exists before attempting the upload.
     if not local_file.is_file():
@@ -32,7 +62,10 @@ def upload_file(s3_client, local_file, s3_key):
         s3_client.upload_file(
             str(local_file),
             BUCKET_NAME,
-            s3_key
+            s3_key,
+            EXTRA_ARGS={
+                "ContentType": content_type
+            }
         )
 
         print(f"\nUploaded: {local_file.name}")
@@ -65,7 +98,8 @@ def upload_json_files(s3_client):
         if upload_file(
             s3_client,
             file_path,
-            s3_key
+            s3_key,
+            "application/json"
         ):
             success_count += 1
 
@@ -108,7 +142,10 @@ def upload_sprites(s3_client):
             s3_client.upload_file(
                 str(file_path),
                 BUCKET_NAME,
-                s3_key
+                s3_key,
+                ExtraArgs={
+                    "ContentType": "image/png"
+                }
             )
 
             success_count += 1
@@ -138,10 +175,10 @@ def upload_to_s3():
     global S3_PREFIX
     S3_PREFIX = S3_PREFIX.strip("/")
 
-    s3_client = boto3.client(
-        "s3",
-        region_name=AWS_REGION
-    )
+    s3_client = create_s3_client()
+
+    if s3_client is None:
+        return False
 
     print(f"Bucket: {BUCKET_NAME}")
     print(f"Group folder: {S3_PREFIX}")
@@ -161,3 +198,21 @@ def upload_to_s3():
     print(f"JSON files failed: {json_failed}")
     print(f"Sprites uploaded: {sprite_success}")
     print(f"Sprites failed: {sprite_failed}")
+
+    # This section is for validation only
+    upload_successful = (
+        json_success == 2
+        and json_failed == 0
+        and sprite_success > 0
+        and sprite_failed == 0
+    )
+
+    if upload_successful:
+        print("\nAll files uploaded successfully.")
+    else:
+        print("\nThe S3 upload completed with failures.")
+
+    return upload_successful
+
+if __name__ == "__main__":
+    upload_to_s3()
