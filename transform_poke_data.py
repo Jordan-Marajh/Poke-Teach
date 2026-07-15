@@ -117,7 +117,7 @@ def transform_data():
 
         ######################### Pokémon
 
-        print("Transforming Pokémon documents...")
+        print("\nTransforming Pokémon documents...")
 
         pokemon_documents = pokemon_collection.find({})
 
@@ -137,7 +137,7 @@ def transform_data():
 
         ######################### Moves
 
-        print("Transforming move documents...")
+        print("\nTransforming move documents...")
 
         move_documents = move_collection.find({})
 
