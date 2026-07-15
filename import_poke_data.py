@@ -42,48 +42,56 @@ def replace_urls(collection):
 def import_data():
     client = MongoClient("mongodb://localhost:27017/") # IP and Port for MongoDB to use
 
-    database = client["pokemon"]
-    pokemon_collection = database["pokemon"]
-    move_collection = database["move"]
+    try: 
+        database = client["pokemon"]
+        pokemon_collection = database["pokemon"]
+        move_collection = database["move"]
 
-    # Clear existing documents before importing fresh data. Moving this caused problems!!
-    pokemon_collection.delete_many({})
-    move_collection.delete_many({})
-    
-    ######################### Pokemon
+        # Clear existing documents before importing fresh data. Moving this caused problems!!
+        pokemon_collection.delete_many({})
+        move_collection.delete_many({})
+        
+        ######################### Pokemon
 
-    print("Downloading Pokémon list...")
-    pokemon_data = get_data("pokemon")
+        print("Downloading Pokémon list...")
+        pokemon_data = get_data("pokemon")
 
-    pokemon_result = pokemon_collection.insert_many(pokemon_data)
+        pokemon_result = pokemon_collection.insert_many(pokemon_data)
 
-    print(f"Inserted {len(pokemon_result.inserted_ids)} Pokémon documents.")
+        print(f"Inserted {len(pokemon_result.inserted_ids)} Pokémon documents.")
 
-    print("Replacing Pokémon URLs with detailed data...")
-    replace_urls(pokemon_collection)
+        print("Replacing Pokémon URLs with detailed data...")
+        replace_urls(pokemon_collection)
 
-    print(
-        "Pokémon documents currently in MongoDB:",
-        pokemon_collection.count_documents({})
-    )
+        print(
+            "Pokémon documents currently in MongoDB:",
+            pokemon_collection.count_documents({})
+        )
 
-    ######################### Moves
+        ######################### Moves
 
-    print("Downloading move list...")
-    moves_data = get_data("move")
+        print("Downloading move list...")
+        moves_data = get_data("move")
 
-    move_result = move_collection.insert_many(moves_data)
+        move_result = move_collection.insert_many(moves_data)
 
-    print(f"Inserted {len(move_result.inserted_ids)} move documents.")
+        print(f"Inserted {len(move_result.inserted_ids)} move documents.")
 
-    print("Replacing Move URLs with detailed data...")
-    replace_urls(move_collection)
+        print("Replacing Move URLs with detailed data...")
+        replace_urls(move_collection)
 
-    print(
-        "Move documents currently in MongoDB:",
-        move_collection.count_documents({})
-    )
+        print(
+            "Move documents currently in MongoDB:",
+            move_collection.count_documents({})
+        )
 
-    #########################
+        #########################
 
-    client.close()
+    except requests.exceptions.RequestException as error:
+        print(f"Error requesting data from PokeAPI: {error}")
+
+    except PyMongoError as error:
+        print(f"MongoDB error: {error}")
+
+    finally:
+        client.close()
