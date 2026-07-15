@@ -1,9 +1,9 @@
 # Import dependencies from other files for readability
 
-from import_poke_data import import_data
-from drop_poke_data import drop_data
-from transform_poke_data import transform_data
-from upload_s3 import upload_data
+from etl.import_poke_data import import_data
+from etl.drop_poke_data import drop_data
+from etl.transform_poke_data import transform_data
+from etl.upload_s3 import upload_data
 
 # Main call
 

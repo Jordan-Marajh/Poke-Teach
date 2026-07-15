@@ -1,6 +1,10 @@
+import json
+from pathlib import Path
+
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
 
+EXPORT_FOLDER = Path("exports")
 MONGO_URI = "mongodb://localhost:27017/"
 DATABASE_NAME = "pokemon"
 
@@ -105,6 +109,33 @@ def transform_move(collection):
 
     return transformed_move
 
+# Export a transformed MongoDB collection as a JSON file.
+def export_collection(collection, file_name):
+
+    # Exclude MongoDB's ObjectId because it cannot be directly
+    # serialised as JSON.
+    documents = list(
+        collection.find(
+            {},
+            {"_id": 0}
+        )
+    )
+
+    file_path = EXPORT_FOLDER / file_name
+
+    with file_path.open("w", encoding="utf-8") as file:
+        json.dump(
+            documents,
+            file,
+            indent=4,
+            ensure_ascii=False
+        )
+
+    print(
+        f"\nExported {len(documents)} documents to "
+        f"{file_path}."
+    )
+
 # Function to transform the data
 def transform_data():
 
@@ -154,6 +185,25 @@ def transform_data():
             move_count += 1
 
         print(f"Transformed {move_count} move documents.")
+
+        ######################### Export
+
+        print(f"\nExporting transformed data...")
+
+        EXPORT_FOLDER.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        export_collection(
+            pokemon_collection,
+            "pokemon.json"
+        )
+
+        export_collection(
+            move_collection,
+            "moves.json"
+        )
 
         #########################
 
