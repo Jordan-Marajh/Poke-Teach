@@ -1,9 +1,6 @@
 # Poke-Teach ETL Pipeline
 ## Overview
 Loading Pokémon data from PokeAPI using Pymongo and hosting on S3.
-[Brief description - 2-3 sentences]
-
-
 
 ## Table of Contents
 - [Pipeline Worflow](#pipeline-workflow)
@@ -55,7 +52,7 @@ Loading Pokémon data from PokeAPI using Pymongo and hosting on S3.
 | `learned_by_pokemon` | Array | List of Pokémon that learn this move | Relationship mapping to Pokémon collection |
 
 ### Data Selection Rationale
-We worked backward from our desired semantic search and recommendation queries to determine which fields to keep:
+We worked backwards from our desired semantic search and recommendation queries to determine which fields to keep:
 - **Search requirements**: Need name, type, and effect descriptions for text matching
 - **Recommendation requirements**: Need stats, type matchups, and move effectiveness for suggesting optimal Pokémon/Moves
 
@@ -67,6 +64,13 @@ We worked backward from our desired semantic search and recommendation queries t
 - AWS Account with S3 access
 - pip (Python package manager)
 
+### Python Libraries
+See `requirements.txt`
+
+Main libraries used:
+- `pymongo`,`requests`, `boto3`  for ETL
+- `sentence-transformers`, `scikit-learn`, `faiss`, `numpy` for Semantic Search
+
 ### Installation
 
 1. Clone the repository
@@ -75,17 +79,43 @@ git clone [your-repo-url]
 cd [repo-name]
 ```
 
-2. 
+2. Install dependencies
+```bash
+pip install -r requirements.txt
+```
 
-3. 
+3. Start MongoDB (optional)
+```bash
+# Start MongoDB (if not already running)
+mongod
+```
 
-4. 
+### Downloading Sprites
+The project includes a utility script to download all Pokémon `default_front` sprites for potential visual display.
 
-5. 
+Why we included this:
+- The script dynamically gets the total number of Pokémon from the API, so it works with any current or future Pokémon count
+- No MongoDB required - downloads directly from PokeAPI
+- Saves images as {pokemon_id}.png for easy lookup
+
+To run:
+```bash
+pip install requests  # If not already installed
+python download_sprites.py
+```
+
+> This will create a sprites/ folder and download all available Pokémon sprites; it includes a small delay between requests to respect PokeAPI's rate limits.
 
 ## Usage
 
 ### ETL Pipeline
+```bash
+# Run the ETL pipeline
+python main.py
+```
+
+Details of the pipeline:
+
 ```bash
 # Extract data from Pokemon API into MongoDB
 python import_poke_data.py
@@ -101,13 +131,13 @@ python upload_s3.py
 ```
 ![MongoDB API call?](/images/.png)
 
-### Query Example
-```bash
-# Run the ETL pipeline
-python main.py
+### Semantic Search
 
-#
-```
+Instructions on how to use the transformed data to search:
+- 
+- 
+- 
+
 ![MongoDB terminal output](/images/.png)
 
 
@@ -126,7 +156,6 @@ python main.py
 
 ### Data Transformation Approach
 - Normalised nested objects from API into flat documents for MongoDB
-- Added computed fields for search optimisation
 - Used existing JSON structure to maintain relationships
 
 
