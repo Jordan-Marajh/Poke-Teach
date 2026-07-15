@@ -7,6 +7,7 @@ DATABASE_NAME = "pokemon"
 
 POKEMON_FIELDS_TO_KEEP = {
     "_id",
+    "id",
     "name",
     "abilities",
     "height",
@@ -21,6 +22,7 @@ POKEMON_FIELDS_TO_KEEP = {
 
 MOVE_FIELDS_TO_KEEP = {
     "_id",
+    "id",
     "name",
     "accuracy",
     "damage_class",
