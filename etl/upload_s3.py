@@ -63,7 +63,7 @@ def upload_file(s3_client, local_file, s3_key, content_type):
             str(local_file),
             BUCKET_NAME,
             s3_key,
-            EXTRA_ARGS={
+            ExtraArgs={
                 "ContentType": content_type
             }
         )

@@ -64,6 +64,7 @@ def download_sprites():
     print(f"Saving to: {SPRITE_FOLDER.absolute()}")
 
     success_count = 0
+    skipped_count = 0
     fail_count = 0
 
     for count, pokemon in enumerate(pokemon_data,start=1):
@@ -76,8 +77,8 @@ def download_sprites():
             fail_count += 1
 
         elif not sprite_url:
-            print(f"\nNo sprite URL found for {pokemon_name}.")
-            fail_count += 1
+            print(f"\nNo sprite URL found for {pokemon_name}. Skipping")
+            skipped_count += 1
 
         else:
             try:
@@ -124,8 +125,8 @@ def download_sprites():
     print()
     print("="*50)
     print("DOWNLOAD SUMMARY")
-    print(f"Successfully downloaded: {success_count}")
-    print(f"Failed or skipped: {fail_count}")
+    print(f"No sprite available: {skipped_count}")
+    print(f"Failed downloads: {fail_count}")
     print(f"Saved to: {SPRITE_FOLDER.absolute()}")
 
     return fail_count == 0

@@ -4,7 +4,9 @@ from pathlib import Path
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
 
-EXPORT_FOLDER = Path(__file__).resolve().parent.parent
+PROJECT_FOLDER = Path(__file__).resolve().parent.parent
+EXPORT_FOLDER = PROJECT_FOLDER / "exports"
+
 MONGO_URI = "mongodb://localhost:27017/"
 DATABASE_NAME = "pokemon"
 

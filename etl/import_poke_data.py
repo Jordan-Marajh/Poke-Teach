@@ -10,7 +10,7 @@ def get_data(group):
 
     response = requests.get(
         f"{POKE_API_URL}/{group}",
-        params={"limit": 25},
+        params={"limit": 10_000, "offset": 0},
         timeout=60
     )
     response.raise_for_status()
