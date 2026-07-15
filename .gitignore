@@ -12,8 +12,6 @@ venv/
 !.env.example
 
 # Generated ETL files
-exports/
-sprites/
 *.log
 
 # Test files created during development
