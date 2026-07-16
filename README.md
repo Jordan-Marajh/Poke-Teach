@@ -1,6 +1,6 @@
 # Poke-Teach ETL Pipeline
 ## Overview
-Loading Pokémon data from PokeAPI using Pymongo and hosting on S3.
+Loading Pokémon data from PokeAPI using Pymongo and hosting on S3. This data is used to perform a semantic search using FAISS indexes from the vector embeddings obtained from the search documents for each Pokemon. These were all built from parsing the exported JSON files.
 
 ## Table of Contents
 - [Pipeline Worflow](#pipeline-workflow)
@@ -26,8 +26,8 @@ Loading Pokémon data from PokeAPI using Pymongo and hosting on S3.
 | `name` | String | Pokémon name | Primary search field |
 | `types` | Array | Pokémon types (e.g., Fire, Water) | Type-based filtering and recommendations |
 | `abilities` | Array | Abilities with name and effect | Searchable field for ability queries |
-| `height` | Integer | Height in decimeters | Physical characteristic filter |
-| `weight` | Integer | Weight in hectograms | Physical characteristic filter |
+| `height_m` | Integer | Height in meters | Physical characteristic filter |
+| `weight_kg` | Integer | Weight in kilograms | Physical characteristic filter |
 | `stats` | Object | Base stats (HP, Attack, Defense, etc.) | Battle calculations and comparisons |
 | `moves` | Array | List of learnable move names | Relationship mapping to moves collection |
 | `sprites` | Object | URLs to Pokémon images; kept only `front_default` | Visual reference for future UI |
@@ -75,16 +75,22 @@ Main libraries used:
 
 1. Clone the repository
 ```bash
-git clone [your-repo-url]
-cd [repo-name]
+git clone "https://github.com/Jordan-Marajh/Poke-Teach"
+cd Poke-Teach
 ```
 
-2. Install dependencies
+2. Create a virtual environment
+```bash
+python -m venv venv
+source venv/Scripts/activate
+```
+
+3. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Start MongoDB (optional)
+4. Start MongoDB (optional)
 ```bash
 # Start MongoDB (if not already running)
 mongod
@@ -102,25 +108,47 @@ Details of the pipeline:
 
 ```bash
 # Extract data from Pokemon API into MongoDB
-python import_poke_data.py
+python etl/import_poke_data.py
 
 # Keep relevant fields from the Pokemon and Move collections
-python drop_poke_data.py
+python etl/drop_poke_data.py
 
 # Filtering and reformatting to flatten the data 
-python transform_poke_data.py
+python etl/transform_poke_data.py
+
+# Download the sprites for the UI 
+python etl/download_sprites.py
 
 # Upload to S3
-python upload_s3.py
+python etl/upload_s3.py
 ```
 ![MongoDB API call?](/images/.png)
 
 ### Semantic Search
 
+For now, this is very limited in scope and handles basic queries about Pokemon and moves.
+
 Instructions on how to use the transformed data to search:
-- 
-- 
-- 
+
+Run `py semantic_search/semantic_search.py` in Git Bash.
+
+You'll be given 3 options from the menu, 1. Search Pokemon, 2. Search moves and 3. Exit.
+
+1. Search Pokemon:
+- Describe the Pokemon you want to find.
+- Type: Specify the Pokemons type(s).
+- Numeric filter: If you know any of the statistics, write them here.
+- Display results: Enter an integer n between 1 and 5. Default is 5.
+
+Should display a list of the top n Pokemon matching your search.
+
+2. Search moves:
+- Describne the move you want to find.
+- Type: Specify the move type.
+- Damage class, Ailment, Priority: If you know them, write them when prompted.
+- Display results: Enter an integer n between 1 and 5. Default is 5.
+
+Should display a list of the top n moves matching your search.
 
 ![MongoDB terminal output](/images/.png)
 
@@ -147,9 +175,8 @@ The project includes a utility script to download all Pokémon `default_front` s
 
 Why we included this:
 - The script dynamically gets the total number of Pokémon from the API, so it works with any current or future Pokémon count
-- No MongoDB required - downloads directly from PokeAPI
 - Saves images as {pokemon_id}.png for easy lookup
-- Local copies ensure we're not dependent on external URLs that could change or break over time
+- Local copies or hosting on S3 ensure we're not dependent on external URLs that could change or break over time
 
 To run:
 ```bash
@@ -163,7 +190,7 @@ python download_sprites.py
 - Add more Pokémon collections (Abilities, Items, etc.)
 - Implement more sophisticated recommendation algorithms
 - Add caching layer for API calls
-- Create a web interface for search
+- Create a web interface/GUI for search
 
 ## Team Members
 - Jordan Marajh
