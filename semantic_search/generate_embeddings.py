@@ -50,7 +50,7 @@ MOVE_INDEX_FILE = (
 
 MODEL_NAME = (
     "sentence-transformers/"
-    "all-MiniLM-L6-v2"
+    "multi-qa-MiniLM-L6-cos-v1"
 )
 
 
@@ -132,7 +132,7 @@ def generate_document_embeddings(
 
     # Generate one normalised embedding for
     # every search document.
-    embeddings = model.encode(
+    embeddings = model.encode_document(
         search_texts,
         convert_to_numpy=True,
         normalize_embeddings=True,

@@ -50,24 +50,140 @@ def join_words(words):
 
     return ", ".join(words[:-1]) + f" and {words[-1]}"
 
-def describe_stat(value):
-
-    # Add descriptive words so that a query such as
-    # "fast Pokémon" can match a numerical speed stat.
+def describe_stat(stat_name, value):
 
     if value >= 120:
-        return "very high"
+        level = "very high"
 
-    if value >= 90:
-        return "high"
+    elif value >= 90:
+        level = "high"
 
-    if value >= 60:
-        return "moderate"
+    elif value >= 60:
+        level = "moderate"
 
-    if value >= 30:
-        return "low"
+    elif value >= 30:
+        level = "low"
 
-    return "very low"
+    else:
+        level = "very low"
+
+    return (
+        f"{level} {stat_name} "
+        f"with a value of {value}"
+    )
+
+def build_pokemon_tags(pokemon):
+
+    stats = pokemon["stats"]
+
+    hp = stats["hp"]
+    attack = stats["attack"]
+    defence = stats["defense"]
+    special_attack = stats["special-attack"]
+    special_defence = stats["special-defense"]
+    speed = stats["speed"]
+
+    tags = []
+
+    # Speed descriptions.
+    if speed >= 120:
+        tags.extend([
+            "extremely fast",
+            "very high speed"
+        ])
+
+    elif speed >= 90:
+        tags.extend([
+            "fast",
+            "high speed"
+        ])
+
+    elif speed <= 30:
+        tags.extend([
+            "extremely slow",
+            "very low speed"
+        ])
+
+    elif speed < 60:
+        tags.extend([
+            "slow",
+            "low speed"
+        ])
+
+    # Offensive descriptions.
+    if attack >= 100:
+        tags.extend([
+            "strong physical attacker",
+            "high physical attack"
+        ])
+
+    if special_attack >= 100:
+        tags.extend([
+            "strong special attacker",
+            "high special attack"
+        ])
+
+    # Defensive descriptions.
+    if defence >= 100:
+        tags.extend([
+            "physically defensive",
+            "high physical defence"
+        ])
+
+    if special_defence >= 100:
+        tags.extend([
+            "specially defensive",
+            "high special defence"
+        ])
+
+    if hp >= 100:
+        tags.extend([
+            "high health",
+            "high HP"
+        ])
+
+    # General battle descriptions.
+    if (
+        hp >= 80
+        and (
+            defence >= 90
+            or special_defence >= 90
+        )
+    ):
+        tags.extend([
+            "bulky",
+            "durable"
+        ])
+
+    if (
+        attack >= 100
+        or special_attack >= 100
+    ) and (
+        defence < 60
+        and special_defence < 60
+    ):
+        tags.extend([
+            "powerful but fragile",
+            "glass cannon"
+        ])
+
+    # Physical size descriptions.
+    height = pokemon["height_m"]
+    weight = pokemon["weight_kg"]
+
+    if height <= 0.5:
+        tags.append("small")
+
+    elif height >= 2:
+        tags.append("tall")
+
+    if weight <= 10:
+        tags.append("lightweight")
+
+    elif weight >= 100:
+        tags.append("heavy")
+
+    return tags
 
 def build_pokemon_search_text(pokemon):
 
@@ -80,7 +196,7 @@ def build_pokemon_search_text(pokemon):
         for pokemon_type in pokemon["types"]
     ]
 
-    normal_abilities = [
+    regular_abilities = [
         readable_name(ability["name"])
         for ability in pokemon["abilities"]
         if not ability["is_hidden"]
@@ -92,65 +208,74 @@ def build_pokemon_search_text(pokemon):
         if ability["is_hidden"]
     ]
 
+    all_abilities = (
+        regular_abilities +
+        hidden_abilities
+    )
+
     stats = pokemon["stats"]
 
+    tags = build_pokemon_tags(
+        pokemon
+    )
+
     search_parts = [
+        f"{name}.",
         (
-            f"{name} is a Pokémon with the types "
-            f"{join_words(pokemon_types)}."
-        ),
-        (
-            f"It is {pokemon['height_m']} metres tall "
-            f"and weighs {pokemon['weight_kg']} kilograms."
+            f"{join_words(pokemon_types)} "
+            f"type Pokémon."
         )
     ]
 
-    if normal_abilities:
-
-        if len(normal_abilities) == 1:
-            search_parts.append(
-                f"Its regular ability is "
-                f"{normal_abilities[0]}."
-            )
-
-        else:
-            search_parts.append(
-                f"Its regular abilities are "
-                f"{join_words(normal_abilities)}."
-            )
-
-    if hidden_abilities:
-
-        if len(hidden_abilities) == 1:
-            search_parts.append(
-                f"Its hidden ability is "
-                f"{hidden_abilities[0]}."
-            )
-
-        else:
-            search_parts.append(
-                f"Its hidden abilities are "
-                f"{join_words(hidden_abilities)}."
-            )
-
-    stat_fields = [
-        ("hp", "HP"),
-        ("attack", "attack"),
-        ("defense", "defence"),
-        ("special-attack", "special attack"),
-        ("special-defense", "special defence"),
-        ("speed", "speed")
-    ]
-
-    for stat_key, stat_name in stat_fields:
-
-        stat_value = stats[stat_key]
-
+    if tags:
         search_parts.append(
-            f"Its {stat_name} is "
-            f"{describe_stat(stat_value)} "
-            f"at {stat_value}."
+            f"Battle and physical traits: "
+            f"{', '.join(tags)}."
         )
+
+    stat_descriptions = [
+        describe_stat(
+            "HP",
+            stats["hp"]
+        ),
+        describe_stat(
+            "physical attack",
+            stats["attack"]
+        ),
+        describe_stat(
+            "physical defence",
+            stats["defense"]
+        ),
+        describe_stat(
+            "special attack",
+            stats["special-attack"]
+        ),
+        describe_stat(
+            "special defence",
+            stats["special-defense"]
+        ),
+        describe_stat(
+            "speed",
+            stats["speed"]
+        )
+    ]
+
+    search_parts.append(
+        "Stats: " +
+        "; ".join(stat_descriptions) +
+        "."
+    )
+
+    if all_abilities:
+        search_parts.append(
+            f"Abilities: "
+            f"{join_words(all_abilities)}."
+        )
+
+    search_parts.append(
+        f"Height {pokemon['height_m']} metres. "
+        f"Weight {pokemon['weight_kg']} kilograms."
+    )
 
     return " ".join(search_parts)
 
@@ -169,139 +294,181 @@ def build_move_search_text(move):
     )
 
     search_parts = [
+        f"{name}.",
         (
-            f"{name} is a {move_type}-type "
+            f"{move_type} type "
             f"{damage_class} move."
         )
     ]
 
-    if move["power"] is None:
+    power = move.get("power")
+
+    if (
+        damage_class == "status"
+        or power is None
+    ):
+        search_parts.extend([
+            "Non-damaging move.",
+            "Status move."
+        ])
+
+    else:
         search_parts.append(
-            "It has no standard power value."
+            f"Damaging move with "
+            f"{power} power."
+        )
+
+        if power >= 120:
+            search_parts.append(
+                "Extremely powerful attack."
+            )
+
+        elif power >= 90:
+            search_parts.append(
+                "Powerful attack."
+            )
+
+        elif power < 50:
+            search_parts.append(
+                "Low-power attack."
+            )
+
+    accuracy = move.get("accuracy")
+
+    if accuracy is None:
+        search_parts.append(
+            "No standard accuracy value."
         )
 
     else:
         search_parts.append(
-            f"It has {move['power']} power."
+            f"{accuracy} percent accuracy."
         )
 
-    if move["accuracy"] is not None:
+    pp = move.get("pp")
+
+    if pp is not None:
         search_parts.append(
-            f"It has {move['accuracy']} "
-            f"percent accuracy."
+            f"{pp} power points."
         )
 
-    if move["pp"] is not None:
-        search_parts.append(
-            f"It has {move['pp']} power points."
-        )
-
-    priority = move["priority"]
+    priority = move.get("priority", 0)
 
     if priority > 0:
         search_parts.append(
-            f"It has increased priority "
-            f"of {priority}."
+            "Increased-priority move."
         )
 
     elif priority < 0:
         search_parts.append(
-            f"It has reduced priority "
-            f"of {priority}."
+            "Reduced-priority move."
         )
 
-    else:
+    target = move.get("target")
+
+    if target:
         search_parts.append(
-            "It has standard priority."
+            f"Targets "
+            f"{readable_name(target)}."
         )
-
-    search_parts.append(
-        f"It targets "
-        f"{readable_name(move['target'])}."
-    )
 
     effect = move.get("effect")
 
     if effect:
 
-        # Remove unnecessary line breaks and repeated spaces.
         cleaned_effect = " ".join(
             effect.split()
         )
 
+        effect_chance = move.get(
+            "effect_chance"
+        )
+
+        if effect_chance is not None:
+            cleaned_effect = (
+                cleaned_effect.replace(
+                    "$effect_chance",
+                    str(effect_chance)
+                )
+            )
+
         search_parts.append(
-            f"Its effect is: {cleaned_effect}"
+            f"Effect: {cleaned_effect}"
         )
 
-    move_meta = move.get("meta")
+    move_meta = move.get("meta") or {}
 
-    if move_meta:
+    ailment = move_meta.get("ailment")
 
-        ailment = move_meta.get("ailment")
-
-        if ailment and ailment != "none":
-            search_parts.append(
-                f"It can cause "
-                f"{readable_name(ailment)}."
-            )
-
-        category = move_meta.get("category")
-
-        if category:
-            search_parts.append(
-                f"Its effect category is "
-                f"{readable_name(category)}."
-            )
-
-        flinch_chance = move_meta.get(
-            "flinch_chance"
+    if ailment and ailment != "none":
+        readable_ailment = readable_name(
+            ailment
         )
 
-        if flinch_chance:
-            search_parts.append(
-                f"It has a {flinch_chance} percent "
-                f"chance to make the target flinch."
+        search_parts.extend([
+            f"Can cause {readable_ailment}.",
+            f"{readable_ailment} inflicting move."
+        ])
+
+    flinch_chance = move_meta.get(
+        "flinch_chance"
+    )
+
+    if flinch_chance:
+        search_parts.extend([
+            "Can make the target flinch.",
+            (
+                f"{flinch_chance} percent "
+                f"flinch chance."
             )
+        ])
 
-        drain = move_meta.get("drain")
+    healing = move_meta.get("healing")
 
-        if drain and drain > 0:
-            search_parts.append(
-                f"It restores health equal to "
-                f"{drain} percent of the damage dealt."
+    if healing and healing > 0:
+        search_parts.extend([
+            "Healing move.",
+            "Restores the user's health.",
+            (
+                f"Restores {healing} percent "
+                f"of maximum health."
             )
+        ])
 
-        elif drain and drain < 0:
-            search_parts.append(
-                f"It causes recoil equal to "
-                f"{abs(drain)} percent of the damage dealt."
-            )
+    drain = move_meta.get("drain")
 
-        healing = move_meta.get("healing")
+    if drain and drain > 0:
+        search_parts.extend([
+            "Health-draining move.",
+            "Restores health from damage dealt."
+        ])
 
-        if healing:
-            search_parts.append(
-                f"It restores {healing} percent "
-                f"of the user's maximum health."
-            )
+    elif drain and drain < 0:
+        search_parts.extend([
+            "Recoil move.",
+            "Damages the user through recoil."
+        ])
 
-        minimum_hits = move_meta.get(
-            "min_hits"
-        )
+    minimum_hits = move_meta.get(
+        "min_hits"
+    )
 
-        maximum_hits = move_meta.get(
-            "max_hits"
-        )
+    maximum_hits = move_meta.get(
+        "max_hits"
+    )
 
-        if (
-            minimum_hits is not None
-            and maximum_hits is not None
-        ):
-            search_parts.append(
-                f"It can hit between "
+    if (
+        minimum_hits is not None
+        and maximum_hits is not None
+    ):
+        search_parts.extend([
+            "Multi-hit move.",
+            (
+                f"Hits between "
                 f"{minimum_hits} and "
                 f"{maximum_hits} times."
             )
+        ])
 
     return " ".join(search_parts)
 
