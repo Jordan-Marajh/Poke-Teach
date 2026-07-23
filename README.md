@@ -122,7 +122,6 @@ python etl/download_sprites.py
 # Upload to S3
 python etl/upload_s3.py
 ```
-![MongoDB API call?](/images/.png)
 
 ### Semantic Search
 
@@ -134,13 +133,23 @@ Run `py semantic_search/semantic_search.py` in Git Bash.
 
 You'll be given 3 options from the menu, 1. Search Pokemon, 2. Search moves and 3. Exit.
 
+![menu](./images/menu.png)
+
 1. Search Pokemon:
 - Describe the Pokemon you want to find.
-- Type: Specify the Pokemons type(s).
+- Type: Specify the Pokemon type(s).
 - Numeric filter: If you know any of the statistics, write them here.
 - Display results: Enter an integer n between 1 and 5. Default is 5.
 
+> **_Search Pokemon example:_** 
+>
+> ![search example](./images/search-example.png)
+
 Should display a list of the top n Pokemon matching your search.
+
+> **_Example output:_** 
+>
+> ![search example output](./images/search-example-results.png)
 
 2. Search moves:
 - Describne the move you want to find.
@@ -148,10 +157,16 @@ Should display a list of the top n Pokemon matching your search.
 - Damage class, Ailment, Priority: If you know them, write them when prompted.
 - Display results: Enter an integer n between 1 and 5. Default is 5.
 
+> **_Search Moves example:_** 
+>
+> ![move example](./images/move-example.png)
+
+
 Should display a list of the top n moves matching your search.
 
-![MongoDB terminal output](/images/.png)
-
+> **_Example output:_** 
+>
+> ![move example output](./images/move-example-results.png)
 
 ## Technical Decisions
 
@@ -162,7 +177,7 @@ Should display a list of the top n moves matching your search.
 - Large community of users
 
 ### Why These Collections?
-- Pokémon and Moves provide natural relationship (Pokémon use Moves)
+- Pokémon and Moves provide natural relationship (Pokémon use Moves, Moves can be learnt by many Pokémon)
 - Easy to demonstrate semantic search (e.g., "show me fire-type Pokémon with high speed")
 - Can extend to include other collections if needed
 
