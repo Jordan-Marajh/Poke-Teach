@@ -206,6 +206,7 @@ python download_sprites.py
 - Implement more sophisticated recommendation algorithms
 - Add caching layer for API calls
 - Create a web interface/GUI for search
+- Use a better trained LLM for semantic search
 
 ## Team Members
 - Jordan Marajh
@@ -213,21 +214,3 @@ python download_sprites.py
 
 ## License
 MIT License
-
-## Semantic Search Notes
-
-QUESTION: in a pokemon battle is it better to have this or that to beat
-
-QUESTION: what is the best move against another team of pokemon
-
-QUESTION: looking at what types of moves a pokemon knows, i have these pokemon in my team, i'm about to face this team, what moves should i teach my pokemon to have the best match up?
-
--> Question: are we giving AI the parameters to choose from
--> in what scenario
-
-QUESTION-> here's the team i'm going up against; what team should i go against based on stats and type that would be the best team?
-
-Question-> given that my opponent will lead with this pokemon, which one should i lead with?
-
-
-QUESTION: 'enter a pokemon that is similar to pikachu' --> maybe it can pick one with same moves etc.
